@@ -1,6 +1,12 @@
+
+const logger = require('../middleware.js');
 const router = require('express').Router();
 
 const Bear = require('./bearModel');
+
+function error(params) {
+  
+}
 
 router
   .route('/')
@@ -8,27 +14,52 @@ router
   .post(post);
 
 router
-  .route('/:id', function (req, res) {
+  .route('/:id')
+   .get((req, res) => {
     const objId = req.params.id;
-    const objectFound = !req.params;
-    Bear.get((req, res) => {
-      res.status(200).json({ route: '/api/bears/' + req.params.id });
-    })
-      .delete((req, res) => {
-        res.status(200).json({ status: 'please implement DELETE functionality' });
+    Bear.findById(objId)
+    .then(bear => {
+      if (bear) {
+        res.status(201).json({ bear })
+      } else {
+        return res.status(404).json({
+          message: "The bear with the specified ID does not exist."
+        })
+      }
       })
-      .put((req, res) => {
-        res.status(200).json({ status: 'please implement PUT functionality' });
-      });
+      .catch(err => {
+        res.status(500).json({ errorMessage: "The bear information could not be retrieved." })
+      })})
+      .delete((req, res) => {
+        const objId = req.params.id;
+        Bear.findByIdAndDelete(objId)
+        .then(deleted => {
+          if (deleted) {
+            res.status(201).json({ deleted })
+          } else {
+            return res.status(404).json({
+              message: "The bear with the specified ID does not exist."
+            })
+          }
+        })
+          .catch(err => {
+            res.status(500).json({
+              errorMessage: "The bear could not be removed" })
+          })
+        })
+      // .put(objId)
+      // .then(bear => {
+      //   res.status(200).json({ status: 'please implement PUT functionality' });
+      // });
 
-  })
+  
 
 function get (req, res) {
   Bear.find().then(bears => {
     res.status(200).json(bears);
   })
     .catch(err => {
-      res.status(500).json(err);
+      res.status(500).json({ errorMessage: "The bear information could not be retrieved." });
 
     });
 }
@@ -43,7 +74,7 @@ function post(req, res) {
     res.status(201).json(bear)
   })
   .catch( err => {
-    res.status(500).json(err);
+    res.status(500).json({ errorMessage: "There was an error while saving the bear to the database" });
 });
 }
 

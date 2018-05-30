@@ -2,6 +2,7 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const logger = require('./middleware.js');
 
 // connect to mongo
 
@@ -19,9 +20,11 @@ const bearController = require('./bears/bearController');
 
 const server = express();
 
+server.use(express.json());
 server.use(helmet());
 server.use(cors());
-server.use(express.json());
+// server.use(logger('loading'));
+
 
 server.get('/', function(req, res) {
   res.status(200).json({ api: 'running' });
