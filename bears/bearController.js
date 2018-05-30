@@ -18,14 +18,14 @@ router
    .get((req, res) => {
     const objId = req.params.id;
     Bear.findById(objId)
-    .then(bear => {
-      if (bear) {
-        res.status(201).json({ bear })
-      } else {
-        return res.status(404).json({
-          message: "The bear with the specified ID does not exist."
-        })
-      }
+      .then(bear => {
+        if (bear) {
+          res.status(201).json({ bear })
+        } else {
+          return res.status(404).json({
+            message: "The bear with the specified ID does not exist."
+          })
+        }
       })
       .catch(err => {
         res.status(500).json({ errorMessage: "The bear information could not be retrieved." })
@@ -35,24 +35,39 @@ router
         Bear.findByIdAndDelete(objId)
         .then(deleted => {
           if (deleted) {
-            res.status(201).json({ deleted })
+            res.status(201).json({ message: "You've deleted the bear", objId })
           } else {
             return res.status(404).json({
               message: "The bear with the specified ID does not exist."
             })
           }
-        })
+      })
           .catch(err => {
             res.status(500).json({
               errorMessage: "The bear could not be removed" })
           })
         })
-      // .put(objId)
-      // .then(bear => {
-      //   res.status(200).json({ status: 'please implement PUT functionality' });
-      // });
-
-  
+      .put((req, res) => {
+        const { id } = req.params;
+        const updatedBear = req.body;
+        Bear.findByIdAndUpdate(id, updatedBear)
+          .then((updated => {
+            if (updated) {
+                res.status(200).json({ updatedBear })
+              
+            } else {
+              return res.status(404).json({
+                message: "The bear with the specified ID does not exist."
+              })
+            }
+          }))
+          .catch(err => {
+            res.status(500).json({
+              errorMessage: "The bear could not be updated"
+            })
+          })
+      })
+      
 
 function get (req, res) {
   Bear.find().then(bears => {
@@ -66,9 +81,13 @@ function get (req, res) {
 
 function post(req, res) {
   const bearData = req.body;
-
   const bear = new Bear(bearData);
-
+  
+  if (!bearData.species || !bearData.latinName) {
+    return res.status(400).json({
+      errorMessage: "Please provide the species and Latin Name for the post."
+    })
+  }
   bear
   .save().then( bear => {
     res.status(201).json(bear)
