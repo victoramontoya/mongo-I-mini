@@ -1,5 +1,12 @@
 # Mongo I Mini Project
 
+WORKFLOW:
+- connect your API to mongo
+- define a schema
+- compile the schema into a model
+- create a mongose document by instatiating (calling new) a model 
+- use the mongoose document to interact with the db document
+
 ## Topics:
 
 * Databases
